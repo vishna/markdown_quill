@@ -49,9 +49,19 @@ class DeltaToMarkdown extends Converter<Delta, String>
   DeltaToMarkdown({
     Map<String, EmbedToMarkdown>? customEmbedHandlers,
     this.visitLineHandleNewLine,
+    Map<String, CustomAttributeHandler>? customTextAttrsHandlers,
   }) {
     if (customEmbedHandlers != null) {
       _embedHandlers.addAll(customEmbedHandlers);
+    }
+
+    if (customTextAttrsHandlers != null) {
+      for (final entry in customTextAttrsHandlers.entries) {
+        _textAttrsHandlers[entry.key] = _AttributeHandler(
+          beforeContent: entry.value.beforeContent,
+          afterContent: entry.value.afterContent,
+        );
+      }
     }
   }
 
@@ -447,4 +457,27 @@ Root? _findRoot(Node? parent) {
     return parent as Root?;
   }
   return _findRoot(parent.parent);
+}
+
+/// public version of [_AttributeHandler]
+class CustomAttributeHandler {
+  ///
+  CustomAttributeHandler({
+    this.beforeContent,
+    this.afterContent,
+  });
+
+  ///
+  final void Function(
+    Attribute<Object?> attribute,
+    Node node,
+    StringSink output,
+  )? beforeContent;
+
+  ///
+  final void Function(
+    Attribute<Object?> attribute,
+    Node node,
+    StringSink output,
+  )? afterContent;
 }
